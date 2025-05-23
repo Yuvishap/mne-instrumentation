@@ -1,0 +1,21 @@
+.app-container {
+  max-width: 700px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #1e293b;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #f8fafc;
+  transition: all 0.3s ease;
+}
+
+.app-container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #f1f5f9;
+  text-align: center;
+  border-bottom: 2px solid #334155;
+  padding-bottom: 0.75rem;
+}

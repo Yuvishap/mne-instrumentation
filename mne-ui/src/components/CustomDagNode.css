@@ -1,0 +1,38 @@
+.custom-node {
+  width: 120px;
+  height: 120px;
+  background-color: #e3e3f3;
+  border: 2px solid #3b4cca;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  position: relative;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.custom-node-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custom-node-label {
+  font-weight: 600;
+  color: #2c3e50;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.custom-node-menu {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  color: #2c3e50;
+}

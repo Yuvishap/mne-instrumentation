@@ -1,0 +1,20 @@
+.dag-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dag-controls {
+  padding: 10px;
+  background: #f5f5f5;
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.dag-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  height: 100%;
+}
