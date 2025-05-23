@@ -5,11 +5,18 @@ mne-ui/node_modules/
 /.pnp
 .pnp.js
 
+# shared local folder
+/datas/
+
 # testing
 /coverage
 
 # production
 /build
+
+# python
+mne-server/__pycache__/
+*.py[cod]
 
 # misc
 .DS_Store
