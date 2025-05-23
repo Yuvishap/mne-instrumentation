@@ -6,7 +6,7 @@ mne-ui/node_modules/
 .pnp.js
 
 # shared local folder
-/datas/
+/data/
 
 # testing
 /coverage
