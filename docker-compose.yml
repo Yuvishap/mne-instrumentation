@@ -17,3 +17,4 @@ services:
       - "5000:5000"
     volumes:
       - ./mne-server:/app
+      - .${LOCAL_SHARED_DATA_PATH}:${SERVER_SHARED_DATA_PATH}  # Mount shared volume

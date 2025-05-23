@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ReactFlowProvider } from 'reactflow';
-import FileUpload from './components/FileUpload';
 import DagEditor from './components/DagEditor';
 import MetadataModal from './components/MetadataModal';
 
@@ -10,6 +9,21 @@ function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const [fileOptions, setFileOptions] = useState([]);
+  const [selectedFilePath, setSelectedFilePath] = useState('');
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/files`);
+        const data = await res.json();
+        setFileOptions(data);
+      } catch (err) {
+        console.error("Failed to fetch files:", err);
+      }
+    };
+    fetchFiles();
+  }, []);
 
   const handleFileSelected = (file) => {
     if (!file) {
@@ -26,7 +40,7 @@ function App() {
         label: 'Input',
         metadata: {
           fileName: file.name,
-          filePath: file.path || file.name,
+          filePath: file.path,
         },
       },
     };
@@ -89,7 +103,29 @@ function App() {
 
       <ReactFlowProvider>
         <div style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <FileUpload onFileSelected={handleFileSelected} />
+          <select
+            value={selectedFilePath}
+            onChange={(e) => {
+              const path = e.target.value;
+              const selected = fileOptions.find(([_, p]) => p === path);
+              if (selected) {
+                const [name, path] = selected;
+                setSelectedFilePath(path);
+                handleFileSelected({ name, path });
+              } else {
+                setSelectedFilePath('');
+                handleFileSelected(null);
+              }
+            }}
+          >
+            <option value="">-- Select EEG File --</option>
+            {fileOptions.map(([name, path]) => (
+              <option key={path} value={path}>
+                {name}
+              </option>
+            ))}
+          </select>
+
           <button onClick={downloadJson} disabled={nodes.length === 0}>
             Download DAG config
           </button>
