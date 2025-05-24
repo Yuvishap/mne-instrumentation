@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ReactFlowProvider } from 'reactflow';
 import DagEditor from './components/DagEditor';
 import MetadataModal from './components/MetadataModal';
@@ -9,54 +9,25 @@ function App() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
-  const [fileOptions, setFileOptions] = useState([]);
-  const [selectedFilePath, setSelectedFilePath] = useState('');
+  const [pendingNode, setPendingNode] = useState(null);
+  const [metadataModalOpen, setMetadataModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/files`);
-        const data = await res.json();
-        setFileOptions(data);
-      } catch (err) {
-        console.error("Failed to fetch files:", err);
-      }
-    };
-    fetchFiles();
-  }, []);
-
-  const handleFileSelected = (file) => {
-    if (!file) {
-      setNodes([]);
-      setEdges([]);
-      return;
-    }
-
-    const inputNode = {
-      id: 'input-node',
-      type: 'default',
-      position: { x: 250, y: 150 },
-      data: {
-        label: 'Input',
-        metadata: {
-          fileName: file.name,
-          filePath: file.path,
-        },
-      },
-    };
-
-    setNodes([inputNode]);
-    setEdges([]);
-  };
-
-  const handleNodeSelect = (id) => {
-    setSelectedNodeId(id);
-  };
+  const handleNodeSelect = (id) => setSelectedNodeId(id);
 
   const handleNodeUpdate = (id, newData) => {
     setNodes((nds) =>
       nds.map((n) => (n.id === id ? { ...n, data: newData } : n))
     );
+  };
+
+  const handleSaveNewNode = (nodeData) => {
+    if (pendingNode) {
+      const newNode = { ...pendingNode, data: nodeData };
+      setNodes((nds) => [...nds, newNode]);
+      setSelectedNodeId(newNode.id);
+      setPendingNode(null);
+      setMetadataModalOpen(false);
+    }
   };
 
   const downloadJson = () => {
@@ -86,63 +57,38 @@ function App() {
     }
   };
 
-  const selectedNode = nodes.find((n) => n.id === selectedNodeId);
-
   return (
-    <div
-      className="app-container"
-      style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '10px',
-        boxSizing: 'border-box',
-      }}
-    >
+    <div className="app-container" style={{ height: '100vh', display: 'flex', flexDirection: 'column', padding: '10px', boxSizing: 'border-box' }}>
       <h1 style={{ marginBottom: '10px' }}>MNE Instrumentation App</h1>
 
       <ReactFlowProvider>
         <div style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <select
-            value={selectedFilePath}
-            onChange={(e) => {
-              const path = e.target.value;
-              const selected = fileOptions.find(([_, p]) => p === path);
-              if (selected) {
-                const [name, path] = selected;
-                setSelectedFilePath(path);
-                handleFileSelected({ name, path });
-              } else {
-                setSelectedFilePath('');
-                handleFileSelected(null);
-              }
+          <button
+            onClick={() => {
+              const id = `node-${Date.now()}`;
+              const newNode = {
+                id,
+                type: 'default',
+                position: { x: 250, y: 150 + nodes.length * 50 },
+                data: { label: '', metadata: {} },
+              };
+              setPendingNode(newNode);
+              setMetadataModalOpen(true);
             }}
           >
-            <option value="">-- Select EEG File --</option>
-            {fileOptions.map(([name, path]) => (
-              <option key={path} value={path}>
-                {name}
-              </option>
-            ))}
-          </select>
+            Add Node
+          </button>
 
           <button onClick={downloadJson} disabled={nodes.length === 0}>
             Download DAG config
           </button>
+
           <button onClick={handleRunClick}>
             Run
           </button>
         </div>
 
-        <div
-          style={{
-            flexGrow: 1,
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            overflow: 'hidden',
-            position: 'relative',
-          }}
-        >
+        <div style={{ flexGrow: 1, border: '1px solid #ccc', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
           <DagEditor
             nodes={nodes}
             setNodes={setNodes}
@@ -153,10 +99,25 @@ function App() {
         </div>
 
         <MetadataModal
-          open={!!selectedNode}
-          node={selectedNode}
-          onClose={() => setSelectedNodeId(null)}
-          onUpdate={handleNodeUpdate}
+          open={metadataModalOpen || !!selectedNodeId}
+          node={pendingNode || nodes.find((n) => n.id === selectedNodeId)}
+          onClose={() => {
+            setMetadataModalOpen(false);
+            setPendingNode(null);
+            setSelectedNodeId(null);
+          }}
+          onUpdate={(id, data) => {
+            if (pendingNode) {
+              handleSaveNewNode(data);
+            } else {
+              handleNodeUpdate(id, data);
+            }
+          }}
+          onRemove={(id) => {
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
+            setSelectedNodeId(null);
+          }}
         />
       </ReactFlowProvider>
     </div>
