@@ -22,10 +22,9 @@ def ping():
     file_path.touch()
     return {"message": "pong"}
 
-server_shared_path = os.environ.get("SERVER_SHARED_DATA_PATH", "/app/shared")
-local_shared_path = os.environ.get("LOCAL_SHARED_DATA_PATH", "/shared_files")
+server_shared_path = os.environ.get("SERVER_SHARED_DATA_PATH", "/app/shared/")
 SHARED_DIR = Path(server_shared_path)
 
 @app.get("/files")
 def list_files():
-    return [(f.name, str(f).replace(server_shared_path, local_shared_path)) for f in SHARED_DIR.glob("*") if f.is_file()]
+    return [(f.name, str(f).replace(server_shared_path, "")) for f in SHARED_DIR.glob("*") if f.is_file()]
