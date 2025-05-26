@@ -31,14 +31,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api/ping")
-def ping():
-    file_path = SHARED_DIR / "test_write"
-
-    # Create an empty file
-    file_path.touch()
-    return {"message": "pong"}
-
 
 @app.get("/files")
 def list_files():
@@ -65,3 +57,18 @@ def get_logs(dag_id: str, node_id: str):
         return {"logs": orchestrator.get_logs(dag_id, node_id)}
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Logs not found")
+
+@app.get("/logs/{dag_id}")
+def get_full_logs(dag_id: str):
+    logs_dir = os.path.join(RUNS_DIR, dag_id, "logs")
+    if not os.path.exists(logs_dir):
+        raise HTTPException(status_code=404, detail="Logs not found")
+
+    logs_output = ""
+    for fname in sorted(os.listdir(logs_dir)):
+        fpath = os.path.join(logs_dir, fname)
+        with open(fpath, "r") as f:
+            logs_output += f"\n\n===== {fname} =====\n"
+            logs_output += f.read()
+
+    return {"logs": logs_output}
