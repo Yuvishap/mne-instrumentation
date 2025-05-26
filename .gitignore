@@ -13,6 +13,7 @@ mne-ui/node_modules/
 
 # production
 /build
+mne-server/runs/
 
 # python
 mne-server/__pycache__/

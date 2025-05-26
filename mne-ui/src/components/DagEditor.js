@@ -21,23 +21,36 @@ function DagEditor({ nodes, setNodes, edges, setEdges, onNodeSelect }) {
     setEdges((eds) => addEdge(connection, eds));
   };
 
-  const onNodeClick = (event, node) => {
-    if (onNodeSelect) {
-      onNodeSelect(node.id);
-    }
+  const onNodeClick = (_, node) => {
+    onNodeSelect(node.id);
+  };
+
+  const getNodeStyle = (status) => {
+    const colors = {
+      success: '#d4edda',
+      failed: '#f8d7da',
+      running: '#fff3cd',
+      pending: '#d1ecf1',
+    };
+    return {
+      border: '2px solid black',
+      background: colors[status] || '#ffffff',
+    };
   };
 
   return (
     <div style={{ height: '100%', width: '100%' }}>
       <ReactFlow
-        nodes={nodes}
+        nodes={nodes.map((n) => ({
+          ...n,
+          style: getNodeStyle(n.data?.metadata?.status),
+        }))}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         fitView
-        style={{ width: '100%', height: '100%' }}
       >
         <Controls />
         <Background />

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ReactFlowProvider } from 'reactflow';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import DagEditor from './components/DagEditor';
 import MetadataModal from './components/MetadataModal';
-
 import './App.css';
 
 function App() {
@@ -11,8 +12,26 @@ function App() {
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [pendingNode, setPendingNode] = useState(null);
   const [metadataModalOpen, setMetadataModalOpen] = useState(false);
+  const [dagId, setDagId] = useState(null);
+  const [nodeLogs, setNodeLogs] = useState({});
+  const [fullLogs, setFullLogs] = useState("");
+  const [showLogModal, setShowLogModal] = useState(false);
+  const pollingRef = useRef(null);
 
-  const handleNodeSelect = (id) => setSelectedNodeId(id);
+  const handleNodeSelect = async (id) => {
+    const node = nodes.find(n => n.id === id);
+    setSelectedNodeId(id);
+
+    if (dagId && node?.data?.metadata?.status === "failed") {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/logs/${dagId}/${id}`);
+        const data = await res.json();
+        setNodeLogs((prev) => ({ ...prev, [id]: data.logs }));
+      } catch (err) {
+        setNodeLogs((prev) => ({ ...prev, [id]: "Failed to load logs." }));
+      }
+    }
+  };
 
   const handleNodeUpdate = (id, newData) => {
     setNodes((nds) =>
@@ -48,21 +67,97 @@ function App() {
 
   const handleRunClick = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/ping`);
-      if (!res.ok) throw new Error("Server returned an error");
-      const data = await res.json();
-      alert(JSON.stringify(data, null, 2));
+      const body = {
+        nodes: nodes.map(n => ({
+          id: n.id,
+          type: n.data.metadata.Type,
+          metadata: n.data.metadata,
+        })),
+        edges: edges.map(e => ({
+          source: e.source,
+          target: e.target,
+        })),
+      };
+      const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const { dag_id } = await res.json();
+      setDagId(dag_id);
+      startPolling(dag_id);
     } catch (err) {
-      alert("Error calling API: " + err.message);
+      toast.error("❌ Failed to start pipeline");
     }
   };
 
+  const startPolling = (dag_id) => {
+    stopPolling();
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/status/${dag_id}`);
+        const status = await res.json();
+
+        const updatedNodes = nodes.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            metadata: { ...n.data.metadata, status: status[n.id] || 'pending' },
+          },
+        }));
+
+        setNodes(updatedNodes);
+
+        const allStatuses = Object.values(status);
+        const done = allStatuses.every(s => s === 'success') || allStatuses.includes('failed');
+        if (done) {
+          stopPolling();
+          if (allStatuses.includes('failed')) {
+            toast.error("❌ Pipeline failed");
+          } else {
+            toast.success("✅ Pipeline completed successfully");
+          }
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+        toast.error("❌ Failed to fetch pipeline status");
+      }
+    }, 2000);
+  };
+
+  const stopPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => stopPolling();
+  }, []);
+
+  const fetchFullLogs = async () => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/logs/${dagId}`);
+      const { logs } = await res.json();
+      setFullLogs(logs);
+      setShowLogModal(true);
+    } catch (err) {
+      toast.error("Failed to fetch full logs.");
+    }
+  };
+
+  const completedNodes = nodes.filter(n => n.data?.metadata?.status === "success").length;
+  const totalNodes = nodes.length;
+  const progressPercent = totalNodes > 0 ? Math.round((completedNodes / totalNodes) * 100) : 0;
+  const isPipelineDone = nodes.length > 0 && nodes.every(n => ['success', 'failed'].includes(n.data?.metadata?.status));
+
   return (
-    <div className="app-container" style={{ height: '100vh', display: 'flex', flexDirection: 'column', padding: '10px', boxSizing: 'border-box' }}>
-      <h1 style={{ marginBottom: '10px' }}>MNE Instrumentation App</h1>
+    <div className="app-container">
+      <h1>MNE Instrumentation App</h1>
 
       <ReactFlowProvider>
-        <div style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="app-toolbar">
           <button
             onClick={() => {
               const id = `node-${Date.now()}`;
@@ -83,12 +178,20 @@ function App() {
             Download DAG config
           </button>
 
-          <button onClick={handleRunClick}>
-            Run
-          </button>
+          <button onClick={handleRunClick}>Run</button>
+
+          {isPipelineDone && (
+            <button onClick={fetchFullLogs}>View Full Logs</button>
+          )}
+
+          {dagId && (
+            <div className="app-progress">
+              Progress: {completedNodes}/{totalNodes} ({progressPercent}%)
+            </div>
+          )}
         </div>
 
-        <div style={{ flexGrow: 1, border: '1px solid #ccc', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+        <div className="app-dag-container">
           <DagEditor
             nodes={nodes}
             setNodes={setNodes}
@@ -101,6 +204,7 @@ function App() {
         <MetadataModal
           open={metadataModalOpen || !!selectedNodeId}
           node={pendingNode || nodes.find((n) => n.id === selectedNodeId)}
+          logs={nodeLogs[selectedNodeId] || ""}
           onClose={() => {
             setMetadataModalOpen(false);
             setPendingNode(null);
@@ -120,6 +224,18 @@ function App() {
           }}
         />
       </ReactFlowProvider>
+
+      {showLogModal && (
+        <div className="log-modal">
+          <div className="log-modal-content">
+            <h3>Pipeline Logs</h3>
+            <pre>{fullLogs}</pre>
+            <button onClick={() => setShowLogModal(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </div>
   );
 }
