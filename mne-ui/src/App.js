@@ -150,7 +150,8 @@ function App() {
   const completedNodes = nodes.filter(n => n.data?.metadata?.status === "success").length;
   const totalNodes = nodes.length;
   const progressPercent = totalNodes > 0 ? Math.round((completedNodes / totalNodes) * 100) : 0;
-  const isPipelineDone = nodes.length > 0 && nodes.every(n => ['success', 'failed'].includes(n.data?.metadata?.status));
+  const isPipelineDone = nodes.length > 0 && nodes.every(n => ['success',].includes(n.data?.metadata?.status));
+  const isPipelineFailed = nodes.length > 0 && nodes.some(n => ['failed'].includes(n.data?.metadata?.status));
 
   return (
     <div className="app-container">
@@ -180,7 +181,7 @@ function App() {
 
           <button onClick={handleRunClick}>Run</button>
 
-          {isPipelineDone && (
+          {(isPipelineDone || isPipelineFailed) && (
             <button onClick={fetchFullLogs}>View Full Logs</button>
           )}
 

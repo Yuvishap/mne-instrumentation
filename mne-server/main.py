@@ -11,6 +11,9 @@ import threading
 from utils.dag_utils import topological_sort, execute_node
 from orchestrator.dag_runner import DAGOrchestrator
 from data_model.dag import DAG
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 orchestrator = DAGOrchestrator()
