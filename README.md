@@ -78,5 +78,13 @@ This will:
 * Expose:
    * Frontend at http://localhost:3000
    * Backend API at http://localhost:5000
+   * Mount a shared data volume at ./data
 
-Mount a shared data volume at ./data
+### 4️⃣ Use the App
+1. Place .fif files into the ./data folder.
+2. Open your browser and go to http://localhost:3000.
+3. Click Add Node, select a Type, and fill in mandatory fields.
+4. Connect nodes to represent your EEG processing DAG.
+5. Press Run to execute the pipeline.
+6. View real-time logs and node statuses.
+7. Final processed .fif files will be available in ./data if the "Output File" node is used.
