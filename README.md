@@ -1,70 +1,66 @@
-# Getting Started with Create React App
+# 🧠 MNE DAG Orchestrator
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is an interactive, containerized EEG preprocessing pipeline tool using [MNE-Python](https://mne.tools/stable/index.html). Users can visually construct a Directed Acyclic Graph (DAG) of processing steps and execute them with live progress updates.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## ✨ Features
 
-### `npm start`
+- ✅ Visual DAG editor with React Flow
+- ✅ Configurable node types:
+  - Input File
+  - Notch Filter
+  - Plot Channels (interactive)
+  - Output File
+- ✅ Full logs for each node
+- ✅ Persistent DAG execution history
+- ✅ GUI plotting using MNE inside Docker via VcXsrv
+- ✅ Scrollable UI-based log viewer
+- ✅ Automatic file sharing via Docker volume
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🧰 Tech Stack
 
-### `npm test`
+| Layer     | Technology         |
+|-----------|--------------------|
+| Frontend  | React, React Flow  |
+| Backend   | FastAPI, MNE-Python|
+| Orchestration | Docker Compose |
+| Volume Sharing | Host ↔ Docker container |
+| GUI Support | VcXsrv (Windows only) |
+| Logging   | Per-node logs, status polling |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🛠️ Setup Instructions
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+These instructions are beginner-friendly and suitable even for users without a tech background!
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1️⃣ Prerequisites
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### 🐳 Docker Desktop for Windows
 
-### `npm run eject`
+1. Download: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
+2. Choose the correct installer for your system (AMD64 or ARM64).
+3. Install and run Docker Desktop.
+4. Make sure Docker is running before continuing.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### 🪟 VcXsrv for GUI (Plotting)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Download from: [https://sourceforge.net/projects/vcxsrv/](https://sourceforge.net/projects/vcxsrv/)
+2. Install and launch VcXsrv with:
+   - ✅ Multiple windows
+   - ✅ Start no client
+   - ✅ Disable access control
+3. Leave VcXsrv open while using the app to enable MNE's interactive plots.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+### 2️⃣ Clone the Repository
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+git clone [https://github.com/YOUR_USERNAME/mne-dag-tool](https://github.com/Yuvishap/mne-instrumentation.git
+cd mne-instrumentation
