@@ -64,3 +64,19 @@ These instructions are beginner-friendly and suitable even for users without a t
 ```bash
 git clone [https://github.com/YOUR_USERNAME/mne-dag-tool](https://github.com/Yuvishap/mne-instrumentation.git
 cd mne-instrumentation
+```
+
+### 3️⃣ Build and Run the App
+
+```bash
+docker compose up --build
+```
+
+This will:
+
+* Build and start both client and server containers
+* Expose:
+   * Frontend at http://localhost:3000
+   * Backend API at http://localhost:5000
+
+Mount a shared data volume at ./data
