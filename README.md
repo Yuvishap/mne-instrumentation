@@ -8,14 +8,8 @@ This project is an interactive, containerized EEG preprocessing pipeline tool us
 
 - ✅ Visual DAG editor with React Flow
 - ✅ Configurable node types:
-  - Input File
-  - Notch Filter
-  - Plot Channels (interactive)
-  - Output File
-- ✅ Full logs for each node
-- ✅ Persistent DAG execution history
 - ✅ GUI plotting using MNE inside Docker via VcXsrv
-- ✅ Scrollable UI-based log viewer
+- ✅ Scrollable UI-based log viewer with full logs for each node 
 - ✅ Automatic file sharing via Docker volume
 
 ---
@@ -28,14 +22,12 @@ This project is an interactive, containerized EEG preprocessing pipeline tool us
 | Backend   | FastAPI, MNE-Python|
 | Orchestration | Docker Compose |
 | Volume Sharing | Host ↔ Docker container |
-| GUI Support | VcXsrv (Windows only) |
+| GUI Support in DOcker | VcXsrv (Windows only) |
 | Logging   | Per-node logs, status polling |
 
 ---
 
 ## 🛠️ Setup Instructions
-
-These instructions are beginner-friendly and suitable even for users without a tech background!
 
 ### 1️⃣ Prerequisites
 
@@ -60,6 +52,8 @@ These instructions are beginner-friendly and suitable even for users without a t
 ---
 
 ### 2️⃣ Clone the Repository
+
+Open terminal and navigate to the folder you would like to store the project in. Run:
 
 ```bash
 git clone [https://github.com/YOUR_USERNAME/mne-dag-tool](https://github.com/Yuvishap/mne-instrumentation.git
