@@ -2,7 +2,6 @@ import os
 from typing import List, Dict
 from collections import defaultdict, deque
 from data_model.dag import Node
-import threading
 from runners import input_file, notch_filter, plot_channels, output_file
 
 def topological_sort(nodes: List[Node], edges: List[Dict]) -> List[Node]:
@@ -30,15 +29,14 @@ def topological_sort(nodes: List[Node], edges: List[Dict]) -> List[Node]:
 
     return sorted_nodes
 
-def execute_node(node: Node, dag_path: str):
-    log_path = os.path.join(dag_path, "logs", f"{node.id}.log")
+def execute_node(node: Node, dag_path: str, log_path: str, cache: dict):
     if node.type == "Input File":
-        input_file.run(node.metadata, log_path)
+        input_file.run(node.metadata, log_path, cache)
     elif node.type == "Notch Filter":
-        notch_filter.run(node.metadata, log_path)
+        notch_filter.run(node.metadata, log_path, cache)
     elif node.type == "Plot Channels":
-        plot_channels.run(node.metadata, log_path)
+        plot_channels.run(node.metadata, log_path, cache)
     elif node.type == "Output File":
-        output_file.run(node.metadata, log_path)
+        output_file.run(node.metadata, log_path, cache)
     else:
         raise Exception(f"Unknown node type: {node.type}")

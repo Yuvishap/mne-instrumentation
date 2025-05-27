@@ -1,2 +1,4 @@
 fastapi==0.110.1
 uvicorn[standard]==0.29.0
+mne==1.6.1
+python-dotenv>=1.0.0
